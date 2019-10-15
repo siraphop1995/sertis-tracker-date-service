@@ -1,0 +1,25 @@
+{
+  "name": "stt-date-service",
+  "version": "1.0.0",
+  "description": "Prototype project for sertise tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "npm run db:start && npm run server:start",
+    "stop:dev": "npm run server:stop && npm run db:stop",
+    "server:start": "pm2 start ecosystem.config.js",
+    "server:stop": "pm2 delete ecosystem.config.js",
+    "db:start": "./scripts/db-start.sh",
+    "db:stop": "docker stop stt-mongo",
+    "log": "pm2 log date"
+  },
+  "author": "siraphop",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "http-status": "^1.3.2",
+    "mongoose": "^5.6.10"
+  }
+}
