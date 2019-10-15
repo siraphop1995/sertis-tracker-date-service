@@ -9,7 +9,6 @@
  * (list, get, create, update, delete). Consult mongoose documentation
  * for more details.
  */
-// const Admin = require('../models/adminListModel');
 const Date = require('../db').dateDocument;
 
 exports.helloWorld = (req, res) => {
@@ -20,7 +19,6 @@ exports.helloWorld = (req, res) => {
 exports.getAllDates = async (req, res) => {
   console.log('getAllDates');
   const date = await Date.find({}, null);
-  console.log(date);
   res.json(date);
 };
 
