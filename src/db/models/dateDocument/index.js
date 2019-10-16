@@ -14,6 +14,10 @@ const dateSchema = mongoose.Schema(
       type: Date,
       default: Date.now
     },
+    testDate: {
+      type: Date,
+      default: Date.now
+    },
     mismatch: {
       type: Number,
       default: 0

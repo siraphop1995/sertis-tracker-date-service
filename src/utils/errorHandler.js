@@ -7,7 +7,12 @@ module.exports = (err, req, res, next) => {
   const getStatusCode = err => {
     let numberFromStatus = Number.isInteger(err.status) && err.status;
     let numberFromCode = Number.isInteger(err.code) && err.code;
-    return numberFromStatus || numberFromCode || 500;
+    let status = numberFromStatus || numberFromCode || 500;
+    if (typeof httpStatus[status] === 'undefined') {
+      err.message = 'Unknown status code: ' + status;
+      status = 500;
+    }
+    return status;
   };
 
   if (!err) err = {};
@@ -17,6 +22,7 @@ module.exports = (err, req, res, next) => {
       err.status = 404;
       err.message = 'Date Not Found.';
       break;
+    case 'BulkWriteError':
     case 'MongoError':
       if (err.code === 11000) {
         err.message = 'Date already exists.';
