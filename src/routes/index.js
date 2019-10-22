@@ -22,4 +22,7 @@ module.exports = {
   'GET /removeAllDate/': {
     middlewares: ['removeAllDate']
   },
+  'POST /findDate/': {
+    middlewares: ['findDate']
+  },
 };

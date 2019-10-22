@@ -67,7 +67,7 @@ exports.generateDate = async (req, res) => {
   let dateArray = [];
   for (let i = 1; i <= dateNo; i++) {
     let newDate = new DateDoc({
-      date: new Date(new Date(2019, 6, 11).valueOf() - 1000 * 60 * 60 * 24 * 0),
+      date: new Date(new Date().valueOf() - 1000 * 60 * 60 * 24 * i),
       employees: users
     });
     dateArray.push(newDate);
@@ -75,10 +75,32 @@ exports.generateDate = async (req, res) => {
   await DateDoc.insertMany(dateArray);
   res.json(dateArray);
 
-  res.json(newDate)
+  res.json(newDate);
 };
 
 exports.removeAllDate = async (req, res) => {
   const date = await DateDoc.deleteMany({});
   res.json(date);
+};
+
+exports.findDate = async (req, res) => {
+  const newDate  = new Date(req.body.newDate);
+  // let newDate = new Date(2019, 9, 14);
+  // let newDate = new Date(new Date().valueOf() - 1000 * 60 * 60 * 24 * 3);
+  console.log(newDate.toString());
+  const newYear = newDate.getFullYear();
+  const newMonth = newDate.getMonth();
+  const newDay = newDate.getDate();
+
+  const date = await DateDoc.findOne({
+    date: {
+      $gte: new Date(newYear, newMonth, newDay),
+      $lt: new Date(newYear, newMonth, newDay + 1)
+    }
+  });
+
+  res.json({
+    newDate: newDate,
+    date: date
+  });
 };
