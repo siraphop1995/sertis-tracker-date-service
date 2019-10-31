@@ -14,6 +14,12 @@ const dateSchema = mongoose.Schema(
       type: Date,
       default: Date.now
     },
+    formatDate: {
+      type: String
+    },
+    dateType: {
+      type: String
+    },
     mismatch: {
       type: Number,
       default: 0
@@ -26,8 +32,22 @@ const dateSchema = mongoose.Schema(
         uid: {
           type: String
         },
-        workHour: {
-          type: Number
+        data: {
+          status: {
+            type: String
+          },
+          inTime: {
+            type: String
+          },
+          outTime: {
+            type: String
+          },
+          totalHour: {
+            type: String
+          },
+          actualHour: {
+            type: String
+          }
         }
       }
     ],

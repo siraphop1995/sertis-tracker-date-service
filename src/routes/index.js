@@ -19,7 +19,7 @@ module.exports = {
   'DELETE /deleteDate/:dateId': {
     middlewares: ['deleteDate']
   },
-  'GET /generateDate/:dateNo': {
+  'POST /generateDate': {
     middlewares: ['generateDate']
   },
   'GET /removeAllDate/': {
