@@ -12,34 +12,58 @@
 const DateDoc = require('../db').dateDocument;
 const axios = require('axios');
 const { USER_SERVER } = process.env;
+const moment = require('moment-timezone');
 exports.getAllDates = async (req, res) => {
   console.log('getAllDateDocs');
   const date = await DateDoc.find({}, null);
   res.json(date);
 };
 
-exports.addDate = async (req, res) => {
-  console.log('addDateDoc');
+exports.createDate = async (req, res) => {
+  console.log('createDate');
   let newDate = new DateDoc(req.body);
   const date = await newDate.save();
   res.json(date);
 };
 
-exports.getDate = async (req, res) => {
-  console.log('getDateDoc');
+exports.findDateById = async (req, res) => {
+  console.log('findDateById');
   const date = await DateDoc.findOne({ _id: req.params.dateId });
   res.json(date);
 };
 
+exports.findDate = async (req, res) => {
+  const { date } = req.body;
+  const [dd, mm, yyyy] = date.split('/');
+  const newDate = moment([yyyy, mm - 1, dd]).tz('Asia/Bangkok');
+
+  const newYear = newDate.year();
+  const newMonth = newDate.month();
+  const newDay = newDate.date();
+
+  const dateRes = await DateDoc.findOne({
+    date: {
+      $gte: moment([newYear, newMonth, newDay]),
+      $lt: moment([newYear, newMonth, newDay + 1])
+    }
+  });
+
+  res.json({
+    newDate: newDate,
+    date: dateRes,
+    moment: moment([newYear, newMonth, newDay])
+  });
+};
+
 exports.updateDate = async (req, res) => {
-  console.log('updateDateDoc');
+  console.log('updateDate');
   let newDateDoc = req.body;
   const date = await DateDoc.updateOne({ _id: req.params.dateId }, newDateDoc);
   res.json(date);
 };
 
 exports.deleteDate = async (req, res) => {
-  console.log('deleteDateDoc');
+  console.log('deleteDate');
   const date = await DateDoc.deleteOne({ _id: req.params.dateId });
   let message = 'No date remove';
   if (date.deletedCount >= 1) {
@@ -55,52 +79,30 @@ exports.deleteDate = async (req, res) => {
 //======= Dev Helper =========
 
 exports.generateDate = async (req, res) => {
-  console.log('generateUsr');
+  console.log('generateDate');
   const { dateNo } = req.params;
-  const users = (await axios.get(`${USER_SERVER}/user`)).data.map(user => {
-    return {
-      _id: user._id,
-      lineId: user.lineId,
-      employeeId: user.employeeId
-    };
-  });
+  const users = (await axios.get(`${USER_SERVER}/getAllUsers`)).data.map(
+    user => {
+      return {
+        _id: user._id,
+        lid: user.lid,
+        uid: user.uid
+      };
+    }
+  );
   let dateArray = [];
   for (let i = 1; i <= dateNo; i++) {
     let newDate = new DateDoc({
-      date: new Date(new Date().valueOf() - 1000 * 60 * 60 * 24 * i),
+      date: moment().subtract(i, 'day'),
       employees: users
     });
     dateArray.push(newDate);
   }
   await DateDoc.insertMany(dateArray);
   res.json(dateArray);
-
-  res.json(newDate);
 };
 
 exports.removeAllDate = async (req, res) => {
   const date = await DateDoc.deleteMany({});
   res.json(date);
-};
-
-exports.findDate = async (req, res) => {
-  const newDate  = new Date(req.body.newDate);
-  // let newDate = new Date(2019, 9, 14);
-  // let newDate = new Date(new Date().valueOf() - 1000 * 60 * 60 * 24 * 3);
-  console.log(newDate.toString());
-  const newYear = newDate.getFullYear();
-  const newMonth = newDate.getMonth();
-  const newDay = newDate.getDate();
-
-  const date = await DateDoc.findOne({
-    date: {
-      $gte: new Date(newYear, newMonth, newDay),
-      $lt: new Date(newYear, newMonth, newDay + 1)
-    }
-  });
-
-  res.json({
-    newDate: newDate,
-    date: date
-  });
 };

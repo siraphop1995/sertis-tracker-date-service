@@ -1,19 +1,22 @@
 'use strict';
 
 module.exports = {
-  'GET /date': {
+  'GET /getAllDates': {
     middlewares: ['getAllDates']
   },
-  'POST /date': {
-    middlewares: ['addDate']
+  'POST /createDate': {
+    middlewares: ['createDate']
   },
-  'GET /date/:dateId': {
-    middlewares: ['getDate']
+  'GET /findDateById/:dateId': {
+    middlewares: ['findDateById']
   },
-  'PATCH /date/:dateId': {
+  'POST /findDate': {
+    middlewares: ['findDate']
+  },
+  'PATCH /updateDate/:dateId': {
     middlewares: ['updateDate']
   },
-  'DELETE /date/:dateId': {
+  'DELETE /deleteDate/:dateId': {
     middlewares: ['deleteDate']
   },
   'GET /generateDate/:dateNo': {
@@ -21,8 +24,5 @@ module.exports = {
   },
   'GET /removeAllDate/': {
     middlewares: ['removeAllDate']
-  },
-  'POST /findDate/': {
-    middlewares: ['findDate']
-  },
+  }
 };

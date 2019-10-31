@@ -20,10 +20,10 @@ const dateSchema = mongoose.Schema(
     },
     employees: [
       {
-        lineId: {
+        lid: {
           type: String
         },
-        employeeId: {
+        uid: {
           type: String
         },
         workHour: {
