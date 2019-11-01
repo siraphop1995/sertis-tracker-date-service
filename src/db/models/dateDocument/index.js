@@ -15,7 +15,8 @@ const dateSchema = mongoose.Schema(
       default: Date.now
     },
     formatDate: {
-      type: String
+      type: String,
+      unique: true
     },
     dateType: {
       type: String
@@ -24,7 +25,7 @@ const dateSchema = mongoose.Schema(
       type: Number,
       default: 0
     },
-    employees: [
+    users: [
       {
         lid: {
           type: String

@@ -16,6 +16,9 @@ module.exports = {
   'PATCH /updateDate/:dateId': {
     middlewares: ['updateDate']
   },
+  'POST /updateDateUser': {
+    middlewares: ['updateDateUser']
+  },
   'DELETE /deleteDate/:dateId': {
     middlewares: ['deleteDate']
   },

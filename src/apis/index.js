@@ -41,7 +41,7 @@ exports.createDate = async (req, res) => {
     date: tempDate,
     formatDate: tempDate.format('DD/MM/YYYY'),
     dateType: await _checkDateType(tempDate),
-    employees: users
+    users: users
   });
   const date = await newDate.save();
   res.json({
@@ -76,6 +76,32 @@ exports.updateDate = async (req, res) => {
   let newDateDoc = req.body;
   const date = await DateDoc.updateOne({ _id: req.params.dateId }, newDateDoc);
   res.json(date);
+};
+
+exports.updateDateUser = async (req, res) => {
+  console.log('updateDateUser');
+  let { userList, dateId } = req.body;
+
+  let dateData = await DateDoc.findOne({ _id: dateId });
+  if (!dateData) return res.status(404).json({ status: 'date not found' });
+
+  const newUserList = dateData.users.map(user => {
+    const newUser = userList.find(userL => userL._id == user._id);
+    const newData = newUser ? newUser.data : user.data;
+    user.data=newData
+    return user
+  });
+
+  const newDate = await DateDoc.findOneAndUpdate(
+    { _id: dateId },
+    {
+      $set: {
+        users: newUserList
+      }
+    }
+  );
+
+  res.json({ date: newDate });
 };
 
 exports.deleteDate = async (req, res) => {
@@ -115,7 +141,7 @@ exports.generateDate = async (req, res) => {
       date: date,
       formatDate: date.format('DD/MM/YYYY'),
       dateType: await _checkDateType(date),
-      employees: users
+      users: users
     });
     dateArray.push(newDate);
   }
