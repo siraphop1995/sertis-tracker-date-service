@@ -36,13 +36,15 @@ exports.createDate = async (req, res) => {
       };
     }
   );
-  const tempDate = moment([year, month - 1, day, 2]);
+  const tempDate = _createMoment(day, month, year);
+
   let newDate = new DateDoc({
     date: tempDate,
-    formatDate: tempDate.format('DD/MM/YYYY'),
     dateType: await _checkDateType(tempDate),
     users: users
   });
+  console.log(newDate);
+
   const date = await newDate.save();
   res.json({
     date: date
@@ -59,16 +61,89 @@ exports.findDate = async (req, res) => {
   const { dateQuery } = req.body;
   const [day, month, year] = _parseDate(dateQuery);
 
+  const tempDate = _createMoment(day, month, year);
+
   const dateRes = await DateDoc.findOne({
-    date: {
-      $gte: moment([year, month - 1, day]),
-      $lt: moment([year, month - 1, day + 1])
-    }
+    date: tempDate
   });
 
   res.json({
     date: dateRes
   });
+};
+
+exports.findUserDate = async (req, res) => {
+  const { userId, monthQuery } = req.body;
+  console.log(monthQuery);
+  let startDate = undefined;
+  let endDate = undefined;
+
+  if (!monthQuery) {
+    endDate = moment()
+      .tz('Asia/Bangkok')
+      .format();
+    startDate = moment(endDate)
+      .subtract(29, 'day')
+      .tz('Asia/Bangkok')
+      .format();
+  } else {
+    endDate = moment(monthQuery)
+      .endOf('month')
+      .tz('Asia/Bangkok')
+      .format();
+    startDate = moment(monthQuery)
+      .startOf('month')
+      .tz('Asia/Bangkok')
+      .format();
+  }
+  let user = (
+    await axios.post(`${USER_SERVER}/findUser`, {
+      uid: userId
+    })
+  ).data;
+  user = {
+    _id: user._id,
+    lid: user.lid,
+    uid: user.uid,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    initCode: user.initCode,
+    dateData: []
+  };
+  const dateData = await DateDoc.find(
+    {
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    },
+    null,
+    { sort: { date: -1 } }
+  );
+
+  const userDateData = dateData.map(date => {
+    let user = date.users.find(user => user.uid === userId);
+
+    date.date = moment(date.date).format('DD/MM/YYYY');
+
+    let dateData = {
+      did: date._id,
+      date: date.date,
+      dateType: date.dateType
+    };
+
+    dateData.date = _addDay(dateData.date);
+    user.data.totalWorkTime = _toHour(user.data.totalWorkTime);
+    user.data.actualWorkTime = _toHour(user.data.actualWorkTime);
+    user.data.expectedWorkTime = _toHour(user.data.expectedWorkTime);
+
+    const { data } = user;
+
+    return { ...dateData, data };
+  });
+  user.dateData = userDateData;
+
+  res.json({ user: user });
 };
 
 exports.updateDate = async (req, res) => {
@@ -79,7 +154,28 @@ exports.updateDate = async (req, res) => {
 };
 
 exports.updateDateUser = async (req, res) => {
-  console.log('updateDateUser');
+  console.log('updateDateUserList');
+  let { userData, userDate } = req.body;
+
+  let dateData = await DateDoc.findOne({ _id: userDate.did });
+  if (!dateData) return res.status(404).json({ status: 'date not found' });
+
+  console.log(userDate.data);
+
+  const newDate = await DateDoc.findOneAndUpdate(
+    { _id: userDate.did, 'users.uid': userData.uid },
+    {
+      $set: {
+        'users.$.data': userDate.data
+      }
+    }
+  );
+
+  res.json({ newDate: newDate });
+};
+
+exports.updateDateUserList = async (req, res) => {
+  console.log('updateDateUserList');
   let { userList, dateId } = req.body;
 
   let dateData = await DateDoc.findOne({ _id: dateId });
@@ -88,8 +184,8 @@ exports.updateDateUser = async (req, res) => {
   const newUserList = dateData.users.map(user => {
     const newUser = userList.find(userL => userL._id == user._id);
     const newData = newUser ? newUser.data : user.data;
-    user.data=newData
-    return user
+    user.data = newData;
+    return user;
   });
 
   const newDate = await DateDoc.findOneAndUpdate(
@@ -136,10 +232,12 @@ exports.generateDate = async (req, res) => {
   let dateArray = [];
 
   for (let i = 0; i < dateNo; i++) {
-    const date = moment([year, month - 1, day, 2]).subtract(i, 'day');
+    const date = moment([year, month - 1, day, 2])
+      .subtract(i, 'day')
+      .tz('Asia/Bangkok')
+      .format();
     let newDate = new DateDoc({
       date: date,
-      formatDate: date.format('DD/MM/YYYY'),
       dateType: await _checkDateType(date),
       users: users
     });
@@ -157,8 +255,33 @@ exports.removeAllDate = async (req, res) => {
 function _parseDate(date) {
   return date.split('/').map(d => parseInt(d, 10));
 }
+
+function _toHour(time) {
+  if (!time) return '-';
+  let hh = Math.floor(time / 60);
+  let mm = Math.floor(time - hh * 60);
+  hh = hh < 10 ? '0' + hh : hh;
+  mm = mm < 10 ? '0' + mm : mm;
+  return `${hh}:${mm}`;
+}
+
+function _addDay(date) {
+  const [dd, mm, yy] = _parseDate(date);
+  const day = moment([yy, mm - 1, dd])
+    .tz('Asia/Bangkok')
+    .format('ddd');
+  return `${date} (${day})`;
+}
+
+function _createMoment(day, month, year) {
+  return moment([year, month - 1, day, 2])
+    .tz('Asia/Bangkok')
+    .format();
+}
+
 async function _checkDateType(date) {
-  const name = date.format('ddd');
+  const newDate = moment(date);
+  const name = newDate.format('ddd');
   let type = 'workday';
   if (name == 'Sat' || name == 'Sun') return 'weekend';
 
@@ -167,7 +290,7 @@ async function _checkDateType(date) {
     'utf8'
   );
   const holidayList = JSON.parse(contents);
-  const formatDate = date.format('DD/MM');
+  const formatDate = newDate.format('DD/MM');
   const result = holidayList.some(h => {
     return h === formatDate;
   });

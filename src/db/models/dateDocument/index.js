@@ -11,12 +11,7 @@ const { hooks, methods, toJSON } = require('./functions');
 const dateSchema = mongoose.Schema(
   {
     date: {
-      type: Date,
-      default: Date.now
-    },
-    formatDate: {
-      type: String,
-      unique: true
+      type: String
     },
     dateType: {
       type: String
@@ -27,6 +22,15 @@ const dateSchema = mongoose.Schema(
     },
     users: [
       {
+        did: {
+          type: String
+        },
+        date: {
+          type: String
+        },
+        dateType: {
+          type: String
+        },
         lid: {
           type: String
         },
@@ -43,10 +47,16 @@ const dateSchema = mongoose.Schema(
           outTime: {
             type: String
           },
-          totalHour: {
+          totalWorkTime: {
             type: String
           },
-          actualHour: {
+          actualWorkTime: {
+            type: String
+          },
+          expectedWorkTime: {
+            type: String
+          },
+          lineIntent: {
             type: String
           }
         }

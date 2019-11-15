@@ -13,11 +13,17 @@ module.exports = {
   'POST /findDate': {
     middlewares: ['findDate']
   },
+  'POST /findUserDate': {
+    middlewares: ['findUserDate']
+  },
   'PATCH /updateDate/:dateId': {
     middlewares: ['updateDate']
   },
   'POST /updateDateUser': {
     middlewares: ['updateDateUser']
+  },
+  'POST /updateDateUserList': {
+    middlewares: ['updateDateUserList']
   },
   'DELETE /deleteDate/:dateId': {
     middlewares: ['deleteDate']

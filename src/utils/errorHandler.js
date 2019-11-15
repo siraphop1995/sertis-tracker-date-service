@@ -4,6 +4,7 @@ const httpStatus = require('http-status');
 
 module.exports = (err, req, res, next) => {
   console.log('errorHandler');
+  console.error(err.message)
   const getStatusCode = err => {
     let numberFromStatus = Number.isInteger(err.status) && err.status;
     let numberFromCode = Number.isInteger(err.code) && err.code;
