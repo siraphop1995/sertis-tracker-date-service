@@ -79,7 +79,7 @@ exports.findUserDate = async (req, res) => {
   let endDate = undefined;
 
   if (!monthQuery) {
-    endDate = moment()
+    endDate = moment([2019, 9, 11])
       .tz('Asia/Bangkok')
       .format();
     startDate = moment(endDate)
@@ -133,9 +133,6 @@ exports.findUserDate = async (req, res) => {
     };
 
     dateData.date = _addDay(dateData.date);
-    user.data.totalWorkTime = _toHour(user.data.totalWorkTime);
-    user.data.actualWorkTime = _toHour(user.data.actualWorkTime);
-    user.data.expectedWorkTime = _toHour(user.data.expectedWorkTime);
 
     const { data } = user;
 
@@ -155,21 +152,17 @@ exports.updateDate = async (req, res) => {
 
 exports.updateDateUser = async (req, res) => {
   console.log('updateDateUserList');
-  let { userData, userDate } = req.body;
-
-  let dateData = await DateDoc.findOne({ _id: userDate.did });
-  if (!dateData) return res.status(404).json({ status: 'date not found' });
-
-  console.log(userDate.data);
+  let { did, uid, newData } = req.body;
 
   const newDate = await DateDoc.findOneAndUpdate(
-    { _id: userDate.did, 'users.uid': userData.uid },
+    { _id: did, 'users.uid': uid },
     {
       $set: {
-        'users.$.data': userDate.data
+        'users.$.data': newData
       }
     }
   );
+  if (!newDate) return res.status(404).json({ status: 'date not found' });
 
   res.json({ newDate: newDate });
 };
@@ -256,13 +249,9 @@ function _parseDate(date) {
   return date.split('/').map(d => parseInt(d, 10));
 }
 
-function _toHour(time) {
-  if (!time) return '-';
-  let hh = Math.floor(time / 60);
-  let mm = Math.floor(time - hh * 60);
-  hh = hh < 10 ? '0' + hh : hh;
-  mm = mm < 10 ? '0' + mm : mm;
-  return `${hh}:${mm}`;
+function _toMin(time) {
+  const [hh, mm] = time.split(':').map(t => parseInt(t, 10));
+  return hh * 60 + mm;
 }
 
 function _addDay(date) {

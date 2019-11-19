@@ -58,6 +58,9 @@ const dateSchema = mongoose.Schema(
           },
           lineIntent: {
             type: String
+          },
+          lineMessage: {
+            type: String
           }
         }
       }
