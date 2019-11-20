@@ -10,13 +10,12 @@
  * for more details.
  */
 const DateDoc = require('../db').dateDocument;
-const axios = require('axios');
-const { USER_SERVER } = process.env;
 const moment = require('moment-timezone');
 const path = require('path');
 const fs = require('fs');
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
+const db = require('../utils/dbHandler');
 
 exports.getAllDates = async (req, res) => {
   console.log('getAllDateDocs');
@@ -25,17 +24,11 @@ exports.getAllDates = async (req, res) => {
 };
 
 exports.createDate = async (req, res) => {
+  console.log('createDate');
   const { dateQuery } = req.body;
   const [day, month, year] = _parseDate(dateQuery);
-  const users = (await axios.get(`${USER_SERVER}/getAllUsers`)).data.map(
-    user => {
-      return {
-        _id: user._id,
-        lid: user.lid,
-        uid: user.uid
-      };
-    }
-  );
+  const users = await db.getUserList();
+
   const tempDate = _createMoment(day, month, year);
 
   let newDate = new DateDoc({
@@ -58,6 +51,8 @@ exports.findDateById = async (req, res) => {
 };
 
 exports.findDate = async (req, res) => {
+  console.log('findDate');
+
   const { dateQuery } = req.body;
   const [day, month, year] = _parseDate(dateQuery);
 
@@ -73,8 +68,9 @@ exports.findDate = async (req, res) => {
 };
 
 exports.findUserDate = async (req, res) => {
+  console.log('findUserDate');
+
   const { userId, monthQuery } = req.body;
-  console.log(monthQuery);
   let startDate = undefined;
   let endDate = undefined;
 
@@ -96,11 +92,7 @@ exports.findUserDate = async (req, res) => {
       .tz('Asia/Bangkok')
       .format();
   }
-  let user = (
-    await axios.post(`${USER_SERVER}/findUser`, {
-      uid: userId
-    })
-  ).data;
+  let user = await db.findUser(userId);
   user = {
     _id: user._id,
     lid: user.lid,
@@ -213,15 +205,7 @@ exports.generateDate = async (req, res) => {
   console.log('generateDate');
   const { dateNo, startDate } = req.body;
   const [day, month, year] = _parseDate(startDate);
-  const users = (await axios.get(`${USER_SERVER}/getAllUsers`)).data.map(
-    user => {
-      return {
-        _id: user._id,
-        lid: user.lid,
-        uid: user.uid
-      };
-    }
-  );
+  const users = await db.getUserList()
   let dateArray = [];
 
   for (let i = 0; i < dateNo; i++) {
