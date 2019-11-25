@@ -1,6 +1,9 @@
 'use strict';
 
 module.exports = {
+  'GET /testDate': {
+    middlewares: ['testDate']
+  },
   'GET /getAllDates': {
     middlewares: ['getAllDates']
   },
@@ -31,7 +34,7 @@ module.exports = {
   'POST /generateDate': {
     middlewares: ['generateDate']
   },
-  'GET /removeAllDate/': {
-    middlewares: ['removeAllDate']
+  'DELETE /deleteAllDate/': {
+    middlewares: ['deleteAllDate']
   }
 };

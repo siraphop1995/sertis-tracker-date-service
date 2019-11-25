@@ -17,6 +17,31 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const db = require('../utils/dbHandler');
 
+exports.testDate = async (req, res) => {
+  console.log('testDate');
+
+  const { dateQuery } = req.body;
+  const [day, month, year] = _parseDate(dateQuery);
+
+  const tempDate = _createMoment(day, month, year);
+
+  let dateRes = await DateDoc.findOne({
+    date: tempDate
+  });
+  dateRes = JSON.parse(JSON.stringify(dateRes));
+  const users = await db.getFullUserList();
+  dateRes.users = dateRes.users.map(d => {
+    const i = users.findIndex(u => u.uid == d.uid);
+    d.firstName = users[i].firstName;
+    d.lastName = users[i].lastName;
+    return d;
+  });
+
+  res.json({
+    date: dateRes
+  });
+};
+
 exports.getAllDates = async (req, res) => {
   console.log('getAllDateDocs');
   const date = await DateDoc.find({}, null);
@@ -58,8 +83,18 @@ exports.findDate = async (req, res) => {
 
   const tempDate = _createMoment(day, month, year);
 
-  const dateRes = await DateDoc.findOne({
+  let dateRes = await DateDoc.findOne({
     date: tempDate
+  });
+  if (!dateRes) return res.json({ date: null });
+  
+  dateRes = JSON.parse(JSON.stringify(dateRes));
+  const users = await db.getFullUserList();
+  dateRes.users = dateRes.users.map(d => {
+    const i = users.findIndex(u => u.uid == d.uid);
+    d.firstName = users[i].firstName;
+    d.lastName = users[i].lastName;
+    return d;
   });
 
   res.json({
@@ -205,7 +240,7 @@ exports.generateDate = async (req, res) => {
   console.log('generateDate');
   const { dateNo, startDate } = req.body;
   const [day, month, year] = _parseDate(startDate);
-  const users = await db.getUserList()
+  const users = await db.getUserList();
   let dateArray = [];
 
   for (let i = 0; i < dateNo; i++) {
@@ -224,7 +259,7 @@ exports.generateDate = async (req, res) => {
   res.json(dateArray);
 };
 
-exports.removeAllDate = async (req, res) => {
+exports.deleteAllDate = async (req, res) => {
   const date = await DateDoc.deleteMany({});
   res.json(date);
 };

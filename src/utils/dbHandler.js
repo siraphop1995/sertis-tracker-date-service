@@ -11,6 +11,10 @@ getUserList = async () => {
   });
 };
 
+getFullUserList = async () => {
+  return (await axios.get(`${USER_SERVER}/getAllUsers`)).data.user;
+};
+
 findUser = async userId => {
   return (
     await axios.post(`${USER_SERVER}/findUser`, {
@@ -21,5 +25,6 @@ findUser = async userId => {
 
 module.exports = {
   getUserList,
-  findUser
+  findUser,
+  getFullUserList
 };
