@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = {
-  'GET /testDate': {
-    middlewares: ['testDate']
+  'GET /': {
+    middlewares: ['helloWorld']
   },
   'GET /getAllDates': {
     middlewares: ['getAllDates']

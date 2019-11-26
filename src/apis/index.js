@@ -17,29 +17,9 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const db = require('../utils/dbHandler');
 
-exports.testDate = async (req, res) => {
-  console.log('testDate');
-
-  const { dateQuery } = req.body;
-  const [day, month, year] = _parseDate(dateQuery);
-
-  const tempDate = _createMoment(day, month, year);
-
-  let dateRes = await DateDoc.findOne({
-    date: tempDate
-  });
-  dateRes = JSON.parse(JSON.stringify(dateRes));
-  const users = await db.getFullUserList();
-  dateRes.users = dateRes.users.map(d => {
-    const i = users.findIndex(u => u.uid == d.uid);
-    d.firstName = users[i].firstName;
-    d.lastName = users[i].lastName;
-    return d;
-  });
-
-  res.json({
-    date: dateRes
-  });
+exports.helloWorld = (req, res, next) => {
+  console.log('Hello World! date-service');
+  res.json({ message: 'Hello World! date-service' });
 };
 
 exports.getAllDates = async (req, res) => {
