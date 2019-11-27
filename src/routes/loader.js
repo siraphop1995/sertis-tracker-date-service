@@ -16,7 +16,7 @@ module.exports = (router, routes, methods) => {
       (chain, middleware) => {
         return chain.concat([asyncWrapper(methods[middleware])]);
       },
-      []
+      [chckToken]
     );
 
     router[httpVerb.toLowerCase()](resourceUri, methodChain);
