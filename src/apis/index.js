@@ -17,17 +17,36 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const db = require('../utils/dbHandler');
 
+/**
+ * GET
+ *   /
+ *     @description To test api to date service
+ *     @return {string} Hello message
+ */
 exports.helloWorld = (req, res, next) => {
   console.log('Hello World! date-service');
   res.json({ message: 'Hello World! date-service' });
 };
 
+/**
+ * GET
+ *   /getAllDates
+ *     @description To get a list of all date
+ *      @return {Array} Array of date data object
+ */
 exports.getAllDates = async (req, res) => {
   console.log('getAllDateDocs');
   const date = await DateDoc.find({}, null);
   res.json(date);
 };
 
+/**
+ * POST
+ *   /createDate
+ *     @description Create new date
+ *      @param req.body.date {Object} Date data object.
+ *      @return {Object} Date data object
+ */
 exports.createDate = async (req, res) => {
   console.log('createDate');
   const { dateQuery } = req.body;
@@ -49,15 +68,28 @@ exports.createDate = async (req, res) => {
   });
 };
 
+/**
+ * POST
+ *   /findDateById/:dateId
+ *     @description Query for date data by id
+ *      @param req.params.dateId {string} Date mongo id.
+ *      @return {object} Date data object
+ */
 exports.findDateById = async (req, res) => {
   console.log('findDateById');
   const date = await DateDoc.findOne({ _id: req.params.dateId });
   res.json(date);
 };
 
+/**
+ * POST
+ *   /findDate
+ *     @description Query for date data by query
+ *      @param req.body.dateQuery {Object} Date data object.
+ *      @return {object} Date data object
+ */
 exports.findDate = async (req, res) => {
   console.log('findDate');
-
   const { dateQuery } = req.body;
   const [day, month, year] = _parseDate(dateQuery);
 
@@ -82,6 +114,17 @@ exports.findDate = async (req, res) => {
   });
 };
 
+/**
+ * POST
+ *   /findUserDate
+ *     @description Query for date data by userId and month.
+ *                  Will find data of specific user only.
+ *                  Will find the whole month if monthQuery,
+ *                  are present
+ *      @param req.body.userId {Object} Date data object.
+ *      @param req.body.monthQuery {string} Month data.
+ *      @return {Array} Array of date data object
+ */
 exports.findUserDate = async (req, res) => {
   console.log('findUserDate');
 
@@ -151,6 +194,14 @@ exports.findUserDate = async (req, res) => {
   res.json({ user: user });
 };
 
+/**
+ * PATCH
+ *   /updateDate/:dateId
+ *     @description Update date data
+ *      @param req.params.dateId {string} Date mongo id.
+ *      @param req.body.query {Object} Date data object.
+ *      @return {Object} Date data object
+ */
 exports.updateDate = async (req, res) => {
   console.log('updateDate');
   let newDateDoc = req.body;
@@ -158,6 +209,16 @@ exports.updateDate = async (req, res) => {
   res.json(date);
 };
 
+/**
+ * POST
+ *   /updateDateUser
+ *     @description Update user data of specific date.
+ *                  Will only update one specific user.
+ *      @param req.body.did {string} Date id of updated date
+ *      @param req.body.uid {string} User id of updated user
+ *      @param req.body.newData {Object} User data to be update
+ *      @return {Object} Date data object
+ */
 exports.updateDateUser = async (req, res) => {
   console.log('updateDateUserList');
   let { did, uid, newData } = req.body;
@@ -175,9 +236,18 @@ exports.updateDateUser = async (req, res) => {
   res.json({ newDate: newDate });
 };
 
+/**
+ * POST
+ *   /updateDateUserList
+ *     @description Update user data of specific date.
+ *                  Will only update multiple user.
+ *      @param req.body.dateId {string} Date id of updated date
+ *      @param req.body.userList {Object} User list data to be update
+ *      @return {Object} Date data object
+ */
 exports.updateDateUserList = async (req, res) => {
   console.log('updateDateUserList');
-  let { userList, dateId } = req.body;
+  let { dateId, userList } = req.body;
 
   let dateData = await DateDoc.findOne({ _id: dateId });
   if (!dateData) return res.status(404).json({ status: 'date not found' });
@@ -201,6 +271,13 @@ exports.updateDateUserList = async (req, res) => {
   res.json({ date: newDate });
 };
 
+/**
+ * DELETE
+ *   /deleteDate/:dateId
+ *     @description Delete date data
+ *      @param req.params.dateId {string} Date mongo id.
+ *      @return {object} Delete response
+ */
 exports.deleteDate = async (req, res) => {
   console.log('deleteDate');
   const date = await DateDoc.deleteOne({ _id: req.params.dateId });
@@ -215,8 +292,16 @@ exports.deleteDate = async (req, res) => {
   res.json(response);
 };
 
-//======= Dev Helper =========
+//The following route are use for testing and development
 
+/**
+ * POST
+ *   /generateDate
+ *     @description Generate empty date according to query
+ *      @param req.body.dateNo {number} Number of date to generate.
+ *      @param req.body.startDate {string} The last date to generate.
+ *      @return {Array} Array of user data object
+ */
 exports.generateDate = async (req, res) => {
   console.log('generateDate');
   const { dateNo, startDate } = req.body;
@@ -240,20 +325,33 @@ exports.generateDate = async (req, res) => {
   res.json(dateArray);
 };
 
+/**
+ * GET
+ *   /deleteAllDate
+ *     @description Delete all date
+ *      @return {Object} Delete respond
+ */
 exports.deleteAllDate = async (req, res) => {
   const date = await DateDoc.deleteMany({});
   res.json(date);
 };
 
+/**
+ * Parse date string into array of date (number)
+ * @param     {string} date - string of date
+ * @returns   {number} number
+ * @example    _parseDate('10/10/2019')
+ */
 function _parseDate(date) {
   return date.split('/').map(d => parseInt(d, 10));
 }
 
-function _toMin(time) {
-  const [hh, mm] = time.split(':').map(t => parseInt(t, 10));
-  return hh * 60 + mm;
-}
-
+/**
+ * Add respective date name into date
+ * @param     {string} date - string of date
+ * @returns   {string} date
+ * @example    _addDay('10/10/2019')
+ */
 function _addDay(date) {
   const [dd, mm, yy] = _parseDate(date);
   const day = moment([yy, mm - 1, dd])
@@ -262,12 +360,29 @@ function _addDay(date) {
   return `${date} (${day})`;
 }
 
+/**
+ * Create a moment date from date string
+ * @param     {number} day
+ * @param     {number} month
+ * @param     {number} year
+ * @returns   {Date} moment date
+ * @example    _createMoment(10,10,2019)
+ */
 function _createMoment(day, month, year) {
   return moment([year, month - 1, day, 2])
     .tz('Asia/Bangkok')
     .format();
 }
 
+/**
+ * Check if the date is weekday/weekend/holiday.
+ * Will read data from holidayList.json to check
+ * for holiday.
+ * @requires  /src/utils/holidayList.json
+ * @param     {Date} date
+ * @returns   {string} dateType
+ * @example    _checkDateType(new Date())
+ */
 async function _checkDateType(date) {
   const newDate = moment(date);
   const name = newDate.format('ddd');

@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
+/**
+ * Async wrapper to wrap module with
+ * try catch
+ */
 function asyncWrapper(fn) {
   return async (req, res, next) => {
     try {
@@ -11,6 +15,18 @@ function asyncWrapper(fn) {
   };
 }
 
+/**
+ * Middle that check bearer token in headers, 
+ * will skip checking findUserDate api
+ *
+ * @param     req.headers.authorization {string} Bearer token.
+ * @response
+ *       200:
+ *         description: Authorized
+ *       401:
+ *         description: Not authorized
+ *         return {string} Rejection mesage
+ */
 function checkToken(req, res, next) {
   if (req.url == '/findUserDate' && req.method == 'POST') {
     axios.defaults.headers.common['authorization'] = process.env.AUTH_TOKEN;
