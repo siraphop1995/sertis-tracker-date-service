@@ -67,7 +67,7 @@ exports.findDate = async (req, res) => {
     date: tempDate
   });
   if (!dateRes) return res.json({ date: null });
-  
+
   dateRes = JSON.parse(JSON.stringify(dateRes));
   const users = await db.getFullUserList();
   dateRes.users = dateRes.users.map(d => {
@@ -108,6 +108,7 @@ exports.findUserDate = async (req, res) => {
       .format();
   }
   let user = await db.findUser(userId);
+
   user = {
     _id: user._id,
     lid: user.lid,
@@ -141,7 +142,7 @@ exports.findUserDate = async (req, res) => {
 
     dateData.date = _addDay(dateData.date);
 
-    const { data } = user;
+    const data = user ? user.data : {};
 
     return { ...dateData, data };
   });
