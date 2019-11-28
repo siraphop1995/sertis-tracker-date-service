@@ -31,7 +31,7 @@ exports.helloWorld = (req, res, next) => {
 /**
  * GET
  *   /getAllDates
- *     @description To get a list of all date
+ *     @description To get a list of all date data
  *      @return {Array} Array of date data object
  */
 exports.getAllDates = async (req, res) => {
@@ -43,7 +43,7 @@ exports.getAllDates = async (req, res) => {
 /**
  * POST
  *   /createDate
- *     @description Create new date
+ *     @description Create new date data
  *      @param req.body.date {Object} Date data object.
  *      @return {Object} Date data object
  */
@@ -105,8 +105,8 @@ exports.findDate = async (req, res) => {
   dateRes.users = dateRes.users.map(d => {
     const i = users.findIndex(u => u.uid == d.uid);
     if (i === -1) {
-      d.firstName = 'delete';
-      d.lastName = 'delete';
+      d.firstName = '{delete}';
+      d.lastName = '{delete}';
     } else {
       d.firstName = users[i].firstName;
       d.lastName = users[i].lastName;
@@ -334,13 +334,15 @@ exports.generateDate = async (req, res) => {
 /**
  * GET
  *   /deleteAllDate
- *     @description Delete all date
+ *     @description Delete all date data
  *      @return {Object} Delete respond
  */
 exports.deleteAllDate = async (req, res) => {
   const date = await DateDoc.deleteMany({});
   res.json(date);
 };
+
+//Function
 
 /**
  * Parse date string into array of date (number)
@@ -367,7 +369,7 @@ function _addDay(date) {
 }
 
 /**
- * Create a moment date from date string
+ * Create a moment date from date
  * @param     {number} day
  * @param     {number} month
  * @param     {number} year

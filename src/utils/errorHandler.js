@@ -3,7 +3,6 @@
 const httpStatus = require('http-status');
 
 /**
- *
  * Error handler middlewear
  *
  * @response
