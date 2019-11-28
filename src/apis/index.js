@@ -104,9 +104,14 @@ exports.findDate = async (req, res) => {
   const users = await db.getFullUserList();
   dateRes.users = dateRes.users.map(d => {
     const i = users.findIndex(u => u.uid == d.uid);
-    if (i === -1) return d;
-    d.firstName = users[i].firstName;
-    d.lastName = users[i].lastName;
+    if (i === -1) {
+      d.firstName = 'delete';
+      d.lastName = 'delete';
+    } else {
+      d.firstName = users[i].firstName;
+      d.lastName = users[i].lastName;
+    }
+
     return d;
   });
 
