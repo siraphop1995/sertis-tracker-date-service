@@ -139,7 +139,7 @@ exports.findUserDate = async (req, res) => {
   let endDate = undefined;
 
   if (!monthQuery) {
-    endDate = moment([2019, 9, 11])
+    endDate = moment()
       .tz('Asia/Bangkok')
       .format();
     startDate = moment(endDate)
